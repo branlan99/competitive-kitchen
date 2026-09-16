@@ -174,7 +174,9 @@ window.CK_PLAN = (() => {
         if (extra) order.push(extra);
       }
     }
-    const taken = order.slice(0, recipe.yield);
+    const leftoverEnabled = recipe.leftover && unused.some((slot) => slot.meal === recipe.leftover);
+    const cap = leftoverEnabled || recipe.meal === "breakfast" ? recipe.yield : 1;
+    const taken = order.slice(0, cap);
     if (!taken.length) return [];
     taken.forEach((slot) => {
       slot.recipe = recipe;
