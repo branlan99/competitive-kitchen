@@ -167,7 +167,7 @@
   function spawnTicket() {
     if (state.tickets.length >= MAX_TICKETS) return;
     const recipe = RECIPES[Math.floor(Math.random() * RECIPES.length)];
-    const life = 18000 + recipe.items.length * 2200;
+    const life = 28000 + recipe.items.length * 3500;
     state.tickets.push({
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       name: recipe.name,
@@ -204,13 +204,11 @@
     if (!match) {
       state.burned += 1;
       state.combo = 1;
-      state.plated = [];
       els.plate.classList.remove("shake");
       void els.plate.offsetWidth;
       els.plate.classList.add("shake");
-      renderPlate();
       renderHud();
-      toast("Sent back — that wasn’t on the rail.");
+      toast("Sent back — plate doesn’t match a live ticket. Undo or dump.");
       return;
     }
 
