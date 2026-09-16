@@ -107,7 +107,7 @@
         return `
           <p class="day-label">${day.label}</p>
           <button class="meal-card" type="button" data-recipe="${recipe.id}">
-            <img alt="" src="${recipe.image || ""}" />
+            <img alt="" src="${recipe.image || ""}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=70'" />
             <div>
               <h3>${recipe.name}</h3>
               <span class="tag">${recipe.tag || "Weeknight"}</span>
@@ -154,7 +154,7 @@
         .map(
           (recipe) => `
         <button class="meal-card" type="button" data-recipe="${recipe.id}">
-          <img alt="" src="${recipe.image || ""}" />
+          <img alt="" src="${recipe.image || ""}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=70'" />
           <div>
             <h3>${recipe.name}</h3>
             <span class="tag">${recipe.tag || "Weeknight"}</span>
@@ -246,7 +246,7 @@
     return `
       <div class="sheet">
         <button class="back" type="button" data-close>←</button>
-        <img class="cover-lg" alt="" src="${recipe.image || ""}" />
+        <img class="cover-lg" alt="" src="${recipe.image || ""}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=70'" />
         <div class="sheet-body">
           <h1>${recipe.name}</h1>
           <span class="tag">${recipe.tag || "Weeknight"}</span>
