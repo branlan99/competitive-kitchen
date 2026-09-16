@@ -22,7 +22,15 @@ window.CK_PLAN = (() => {
     return Math.max(0, Math.ceil(qty / pack - 1e-9));
   }
 
-  function shoppingFromBatches(batches, pantry, people) {
+  function priceAt(ingredientId, storeId) {
+    const item = INGREDIENTS[ingredientId];
+    if (storeId && item.prices[storeId] != null) {
+      return { storeId, unitPrice: item.prices[storeId] };
+    }
+    return bestBuy(ingredientId);
+  }
+
+  function shoppingFromBatches(batches, pantry, people, storeId) {
     const need = {};
     for (const { recipe } of batches) {
       for (const row of recipe.ingredients) {
@@ -34,7 +42,7 @@ window.CK_PLAN = (() => {
     return Object.entries(need)
       .map(([id, qty]) => {
         const item = INGREDIENTS[id];
-        const buy = bestBuy(id);
+        const buy = priceAt(id, storeId);
         const packs = packsFor(qty, item.pack);
         const cost = +(packs * item.pack * buy.unitPrice).toFixed(2);
         const alts = STORES.map((store) => ({
@@ -103,8 +111,8 @@ window.CK_PLAN = (() => {
       .sort((a, b) => b.total - a.total);
   }
 
-  function recipeCost(recipe, pantry, people) {
-    return totalCost(shoppingFromBatches([{ recipe }], pantry, people));
+  function recipeCost(recipe, pantry, people, storeId) {
+    return totalCost(shoppingFromBatches([{ recipe }], pantry, people, storeId));
   }
 
   function cravingScore(recipe, cravings) {
@@ -123,21 +131,24 @@ window.CK_PLAN = (() => {
     const mondayOffset = (start.getDay() + 6) % 7;
     start.setDate(start.getDate() - mondayOffset);
     const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     return names.map((name, index) => {
       const date = new Date(start);
       date.setDate(start.getDate() + index);
       return {
         key: name,
         name,
+        label: labels[index],
         date: date.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
       };
     });
   }
 
-  function emptySlots(days, meals) {
+  function emptySlots(days, meals, cookingDays) {
+    const activeDays = cookingDays ? days.filter((day) => cookingDays[day.key]) : days;
     const types = ["breakfast", "lunch", "dinner"].filter((meal) => meals[meal]);
     const slots = [];
-    for (const day of days) {
+    for (const day of activeDays) {
       for (const meal of types) {
         slots.push({ day: day.key, date: day.date, meal, recipe: null, leftover: false });
       }
@@ -179,18 +190,19 @@ window.CK_PLAN = (() => {
     }
   }
 
-  function planWeek({ budget, people, meals, cravings, pantry }) {
+  function planWeek({ budget, people, meals, cravings, pantry, storeId, cookingDays }) {
     const headcount = Math.max(1, Number(people) || 1);
     const cap = Math.max(15, Number(budget) || 70);
     const days = weekDays();
-    const slots = emptySlots(days, meals);
+    const slots = emptySlots(days, meals, cookingDays);
     const pantrySet = pantry instanceof Set ? pantry : new Set(pantry || []);
     const batches = [];
+    const shopStore = storeId || "bargain";
 
     const ranked = RECIPES.map((recipe) => ({
       recipe,
       score: cravingScore(recipe, cravings),
-      cost: recipeCost(recipe, pantrySet, headcount),
+      cost: recipeCost(recipe, pantrySet, headcount, shopStore),
     })).sort((a, b) => b.score - a.score || a.cost / a.recipe.yield - b.cost / b.recipe.yield);
 
     const tryAdd = (recipe, allowDup = false) => {
@@ -200,7 +212,7 @@ window.CK_PLAN = (() => {
       const taken = assignRecipe(slots, recipe);
       if (!taken.length) return false;
       batches.push({ recipe });
-      if (totalCost(shoppingFromBatches(batches, pantrySet, headcount)) > cap + 0.049) {
+      if (totalCost(shoppingFromBatches(batches, pantrySet, headcount, shopStore)) > cap + 0.049) {
         batches.pop();
         unassign(taken);
         return false;
@@ -228,10 +240,11 @@ window.CK_PLAN = (() => {
       tryAdd(row.recipe, true);
     }
 
-    const lines = shoppingFromBatches(batches, pantrySet, headcount);
+    const lines = shoppingFromBatches(batches, pantrySet, headcount, shopStore);
     const trips = consolidateTrips(lines);
     const spent = totalCost(lines);
     const filled = slots.filter((slot) => slot.recipe).length;
+    const mealPrice = (recipe) => +(recipeCost(recipe, pantrySet, headcount, shopStore) / recipe.yield).toFixed(2);
 
     return {
       days,
@@ -242,17 +255,19 @@ window.CK_PLAN = (() => {
       spent,
       budget: cap,
       people: headcount,
+      storeId: shopStore,
       withinBudget: spent <= cap + 0.049,
       coverage: slots.length ? filled / slots.length : 1,
-      savedByPantry: estimatePantrySavings(batches, pantrySet, headcount),
+      savedByPantry: estimatePantrySavings(batches, pantrySet, headcount, shopStore),
+      mealPrice,
     };
   }
 
-  function estimatePantrySavings(batches, pantry, people) {
-    const withPantry = totalCost(shoppingFromBatches(batches, pantry, people));
-    const without = totalCost(shoppingFromBatches(batches, new Set(), people));
+  function estimatePantrySavings(batches, pantry, people, storeId) {
+    const withPantry = totalCost(shoppingFromBatches(batches, pantry, people, storeId));
+    const without = totalCost(shoppingFromBatches(batches, new Set(), people, storeId));
     return +Math.max(0, without - withPantry).toFixed(2);
   }
 
-  return { planWeek, bestBuy, storeById, STORES };
+  return { planWeek, bestBuy, storeById, recipeCost, STORES };
 })();

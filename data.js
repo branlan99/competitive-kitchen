@@ -2,31 +2,31 @@ window.CK_DATA = (() => {
   const STORES = [
     {
       id: "bargain",
-      name: "Bargain Basket",
+      name: "Aldi",
       kind: "Discount grocer",
-      mapsQuery: "Aldi grocery",
+      mapsQuery: "Aldi",
       blurb: "Best on staples, produce, and store-brand proteins.",
     },
     {
       id: "value",
-      name: "SuperValue",
+      name: "Walmart",
       kind: "Big-box grocery",
       mapsQuery: "Walmart Supercenter grocery",
-      blurb: "Broadest shelf. Strong when Bargain Basket is missing an item.",
+      blurb: "Broadest shelf. Strong when Aldi is missing an item.",
     },
     {
       id: "harbor",
-      name: "Harbor Market",
+      name: "Kroger",
       kind: "Neighborhood supermarket",
       mapsQuery: "Kroger",
-      blurb: "Sales and meat counter. Use when you need a conventional supermarket.",
+      blurb: "Sales and meat counter.",
     },
     {
       id: "grove",
-      name: "Grove & Vine",
+      name: "Whole Foods",
       kind: "Premium grocer",
       mapsQuery: "Whole Foods Market",
-      blurb: "Highest prices. Only worth it if you specifically want this store.",
+      blurb: "Highest prices. Only if you want this store.",
     },
   ];
 
@@ -306,7 +306,7 @@ window.CK_DATA = (() => {
       yield: 4,
       leftover: "lunch",
       minutes: 40,
-      cuisines: ["asian", "comfort"],
+      cuisines: ["asian", "indian", "comfort"],
       proteins: ["vegetarian"],
       ingredients: [
         { id: "lentils", qty: 1 },
@@ -526,8 +526,35 @@ window.CK_DATA = (() => {
     },
   ];
 
+  const RECIPE_META = {
+    "oat-bowls": { image: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=800&q=70", kcal: 360, protein: 12, carbs: 54, fat: 11, tag: "Speedy Meals" },
+    "egg-toast": { image: "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=800&q=70", kcal: 320, protein: 18, carbs: 28, fat: 14, tag: "Speedy Meals" },
+    "yogurt-cups": { image: "https://images.unsplash.com/photo-1488477182946-bb92d543bac5?auto=format&fit=crop&w=800&q=70", kcal: 290, protein: 16, carbs: 32, fat: 10, tag: "Speedy Meals" },
+    "breakfast-burritos": { image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=800&q=70", kcal: 410, protein: 22, carbs: 38, fat: 18, tag: "High Protein" },
+    chili: { image: "https://images.unsplash.com/photo-1515516969-d4008cc6241a?auto=format&fit=crop&w=800&q=70", kcal: 480, protein: 32, carbs: 42, fat: 18, tag: "Batch Cook" },
+    "turkey-chili": { image: "https://images.unsplash.com/photo-1547592166-23acba8896fb?auto=format&fit=crop&w=800&q=70", kcal: 430, protein: 34, carbs: 40, fat: 12, tag: "High Protein" },
+    "garlic-chicken-rice": { image: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=800&q=70", kcal: 520, protein: 38, carbs: 48, fat: 16, tag: "High Protein" },
+    "taco-skillet": { image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=70", kcal: 490, protein: 36, carbs: 44, fat: 18, tag: "Speedy Meals" },
+    "pasta-marinara": { image: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a7?auto=format&fit=crop&w=800&q=70", kcal: 440, protein: 14, carbs: 68, fat: 12, tag: "Speedy Meals" },
+    "sausage-pasta": { image: "https://images.unsplash.com/photo-1551183053-bf2f2fb1d8e1?auto=format&fit=crop&w=800&q=70", kcal: 560, protein: 24, carbs: 62, fat: 22, tag: "Comfort" },
+    "lentil-curry": { image: "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?auto=format&fit=crop&w=800&q=70", kcal: 410, protein: 20, carbs: 62, fat: 8, tag: "Gut Friendly" },
+    "stir-fry": { image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=70", kcal: 390, protein: 18, carbs: 48, fat: 12, tag: "Speedy Meals" },
+    "sheet-sausage": { image: "https://images.unsplash.com/photo-1529042410759-befb0e6e2093?auto=format&fit=crop&w=800&q=70", kcal: 540, protein: 26, carbs: 38, fat: 28, tag: "Sheet Pan" },
+    "potato-bar": { image: "https://images.unsplash.com/photo-1551462147-ff29053bfc14?auto=format&fit=crop&w=800&q=70", kcal: 470, protein: 16, carbs: 64, fat: 16, tag: "Comfort" },
+    "tuna-pasta": { image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=800&q=70", kcal: 430, protein: 28, carbs: 52, fat: 12, tag: "Speedy Meals" },
+    "greek-chicken": { image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=70", kcal: 500, protein: 40, carbs: 42, fat: 16, tag: "High Protein" },
+    "bean-quesadilla": { image: "https://images.unsplash.com/photo-1618040996337-56904b7850b9?auto=format&fit=crop&w=800&q=70", kcal: 420, protein: 18, carbs: 46, fat: 18, tag: "Speedy Meals" },
+    "tuna-sandwich": { image: "https://images.unsplash.com/photo-1528736235302-52922df5c122?auto=format&fit=crop&w=800&q=70", kcal: 340, protein: 26, carbs: 32, fat: 10, tag: "Speedy Meals" },
+    "hummus-bowls": { image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=70", kcal: 380, protein: 14, carbs: 52, fat: 12, tag: "Gut Friendly" },
+    "peanut-noodles": { image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=70", kcal: 520, protein: 18, carbs: 64, fat: 20, tag: "Speedy Meals" },
+    "rice-beans": { image: "https://images.unsplash.com/photo-1543353071-873f17a7a088?auto=format&fit=crop&w=800&q=70", kcal: 390, protein: 16, carbs: 68, fat: 6, tag: "Gut Friendly" },
+    "tomato-soup-melt": { image: "https://images.unsplash.com/photo-1547592166-23acba8896fb?auto=format&fit=crop&w=800&q=70", kcal: 410, protein: 14, carbs: 46, fat: 16, tag: "Comfort" },
+  };
+
   RECIPES.forEach((recipe) => {
     recipe.ingredients = recipe.ingredients.filter((row) => INGREDIENTS[row.id]);
+    Object.assign(recipe, RECIPE_META[recipe.id] || {});
+    if (!recipe.tag) recipe.tag = recipe.minutes <= 25 ? "Speedy Meals" : "Weeknight";
   });
 
   return { STORES, INGREDIENTS, PANTRY_GROUPS, RECIPES };
