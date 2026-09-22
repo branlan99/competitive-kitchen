@@ -221,6 +221,10 @@ h2 {
   padding: 8px 6px calc(8px + var(--safe-b));
 }
 
+.tabs[hidden] {
+  display: none;
+}
+
 .tabs button {
   border: 0;
   background: none;
@@ -566,4 +570,5 @@ input[type="number"] {
 
 #screen:has(.hero-green) {
   padding-top: 0;
+  padding-bottom: 28px;
 }
