@@ -588,10 +588,12 @@ window.CK_RECIPES = (() => {
       ...shuffle(grouped.dinner).slice(0, 6),
     ];
     const looked = await Promise.all(sampled.map((row) => lookupMeal(row.id).then((meal) => ({ meal, preferred: row.preferred })).catch(() => null)));
+    const awkward = /ugali|mandazi|kedgeree|poffertjes|flija|lahsa|torrijas|rømmegrøt|rommegrot|saltfish|chop up/i;
     const recipes = looked
       .map((row) => row && row.meal && fromMeal(row.meal, row.preferred))
       .filter(Boolean)
-      .filter((recipe) => recipe.ingredients.length <= 14);
+      .filter((recipe) => recipe.ingredients.length <= 14)
+      .filter((recipe) => recipe.meal !== "breakfast" || !awkward.test(recipe.name));
 
     window.CK_DATA.addRecipes(recipes);
     writeCache(recipes, extraIngredients());

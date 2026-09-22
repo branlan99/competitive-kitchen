@@ -139,6 +139,7 @@ window.CK_PLAN = (() => {
 
   function cravingScore(recipe, cravings) {
     let score = 1;
+    if (recipe.source === "local") score += 1.5;
     if (cravings.cuisines.length) {
       score += recipe.cuisines.some((tag) => cravings.cuisines.includes(tag)) ? 5 : -1;
     }
