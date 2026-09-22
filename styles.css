@@ -50,6 +50,19 @@ select {
   padding: 22px 18px 28px;
 }
 
+.hero-green h1 {
+  margin: 16px 0 8px;
+  font-size: 1.7rem;
+  letter-spacing: -0.03em;
+}
+
+.hero-sub {
+  margin: 0;
+  color: #3a4a12;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 .logo-row {
   display: flex;
   align-items: center;
@@ -480,4 +493,77 @@ input[type="number"] {
   font-size: 1.55rem;
   letter-spacing: -0.03em;
   margin: 4px 0 14px;
+}
+
+.store-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.store-card {
+  border: 0;
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.store-card strong {
+  display: block;
+}
+
+.store-card small {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.store-card.on {
+  background: var(--lime);
+}
+
+.store-card.on small {
+  color: #3d4d14;
+}
+
+.empty-slot {
+  padding: 14px;
+  color: #888;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.fine-print {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin: 12px 0 0;
+}
+
+.notice {
+  background: #fff4d6;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.steps {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.steps li {
+  margin: 0 0 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.btn:disabled {
+  opacity: 0.7;
+}
+
+#screen:has(.hero-green) {
+  padding-top: 0;
 }

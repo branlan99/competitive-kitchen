@@ -1,21 +1,38 @@
 window.CK_PLAN = (() => {
-  const { STORES, INGREDIENTS, RECIPES } = window.CK_DATA;
+  function stores() {
+    return window.CK_DATA.STORES;
+  }
+
+  function ingredients() {
+    return window.CK_DATA.INGREDIENTS;
+  }
+
+  function recipes() {
+    return window.CK_DATA.RECIPES;
+  }
 
   function storeById(id) {
-    return STORES.find((store) => store.id === id);
+    return stores().find((store) => store.id === id) || stores()[0];
+  }
+
+  function priceFor(item, storeId) {
+    if (storeId && item.prices[storeId] != null) return item.prices[storeId];
+    if (item.prices.value != null) return item.prices.value;
+    return Object.values(item.prices).find((n) => n != null) || 0;
   }
 
   function bestBuy(ingredientId) {
-    const item = INGREDIENTS[ingredientId];
+    const item = ingredients()[ingredientId];
+    if (!item) return null;
     let best = null;
-    for (const store of STORES) {
+    for (const store of stores()) {
       const unitPrice = item.prices[store.id];
       if (unitPrice == null) continue;
       if (!best || unitPrice < best.unitPrice) {
         best = { storeId: store.id, unitPrice };
       }
     }
-    return best;
+    return best || { storeId: stores()[0].id, unitPrice: priceFor(item) };
   }
 
   function packsFor(qty, pack) {
@@ -23,7 +40,8 @@ window.CK_PLAN = (() => {
   }
 
   function priceAt(ingredientId, storeId) {
-    const item = INGREDIENTS[ingredientId];
+    const item = ingredients()[ingredientId];
+    if (!item) return { storeId: storeId || "bargain", unitPrice: 0 };
     if (storeId && item.prices[storeId] != null) {
       return { storeId, unitPrice: item.prices[storeId] };
     }
@@ -35,22 +53,26 @@ window.CK_PLAN = (() => {
     for (const { recipe } of batches) {
       for (const row of recipe.ingredients) {
         if (pantry.has(row.id)) continue;
+        if (!ingredients()[row.id]) continue;
         need[row.id] = (need[row.id] || 0) + row.qty * people;
       }
     }
 
     return Object.entries(need)
       .map(([id, qty]) => {
-        const item = INGREDIENTS[id];
+        const item = ingredients()[id];
         const buy = priceAt(id, storeId);
         const packs = packsFor(qty, item.pack);
         const cost = +(packs * item.pack * buy.unitPrice).toFixed(2);
-        const alts = STORES.map((store) => ({
-          storeId: store.id,
-          store: store.name,
-          unitPrice: item.prices[store.id],
-          packCost: +(item.pack * item.prices[store.id]).toFixed(2),
-        }));
+        const alts = stores().map((store) => {
+          const unitPrice = priceFor(item, store.id);
+          return {
+            storeId: store.id,
+            store: store.name,
+            unitPrice,
+            packCost: +(item.pack * unitPrice).toFixed(2),
+          };
+        });
         return {
           id,
           name: item.name,
@@ -159,8 +181,8 @@ window.CK_PLAN = (() => {
   function assignRecipe(slots, recipe) {
     const unused = slots.filter((slot) => !slot.recipe);
     let order = [];
-    if (recipe.meal === "breakfast") {
-      order = unused.filter((slot) => slot.meal === "breakfast");
+    if (recipe.meal === "breakfast" || recipe.meal === "lunch") {
+      order = unused.filter((slot) => slot.meal === recipe.meal);
     } else {
       const daysSeen = [];
       for (const slot of unused) {
@@ -169,13 +191,15 @@ window.CK_PLAN = (() => {
       for (const day of daysSeen) {
         const primary = unused.find((slot) => slot.day === day && slot.meal === recipe.meal);
         const extra =
-          recipe.leftover && unused.find((slot) => slot.day === day && slot.meal === recipe.leftover);
+          recipe.leftover &&
+          unused.find((slot) => slot.day === day && slot.meal === recipe.leftover && slot !== primary);
         if (primary) order.push(primary);
-        if (extra) order.push(extra);
+        if (extra && extra !== primary) order.push(extra);
       }
     }
-    const leftoverEnabled = recipe.leftover && unused.some((slot) => slot.meal === recipe.leftover);
-    const cap = leftoverEnabled || recipe.meal === "breakfast" ? recipe.yield : 1;
+    const leftoverEnabled =
+      recipe.leftover && unused.some((slot) => slot.meal === recipe.leftover && slot.meal !== recipe.meal);
+    const cap = leftoverEnabled || recipe.meal === "breakfast" || recipe.meal === "lunch" ? recipe.yield : 1;
     const taken = order.slice(0, cap);
     if (!taken.length) return [];
     taken.forEach((slot) => {
@@ -194,18 +218,20 @@ window.CK_PLAN = (() => {
 
   function planWeek({ budget, people, meals, cravings, pantry, storeId, cookingDays }) {
     const headcount = Math.max(1, Number(people) || 1);
-    const cap = Math.max(15, Number(budget) || 70);
+    const cap = Math.max(15, Number(budget) || 90);
     const days = weekDays();
     const slots = emptySlots(days, meals, cookingDays);
     const pantrySet = pantry instanceof Set ? pantry : new Set(pantry || []);
     const batches = [];
     const shopStore = storeId || "bargain";
 
-    const ranked = RECIPES.map((recipe) => ({
-      recipe,
-      score: cravingScore(recipe, cravings),
-      cost: recipeCost(recipe, pantrySet, headcount, shopStore),
-    })).sort((a, b) => b.score - a.score || a.cost / a.recipe.yield - b.cost / b.recipe.yield);
+    const ranked = recipes()
+      .map((recipe) => ({
+        recipe,
+        score: cravingScore(recipe, cravings),
+        cost: recipeCost(recipe, pantrySet, headcount, shopStore),
+      }))
+      .sort((a, b) => b.score - a.score || a.cost / a.recipe.yield - b.cost / b.recipe.yield);
 
     const tryAdd = (recipe, allowDup = false) => {
       const copies = batches.filter((row) => row.recipe.id === recipe.id).length;
@@ -225,11 +251,9 @@ window.CK_PLAN = (() => {
     const breakfasts = ranked.filter((row) => row.recipe.meal === "breakfast");
     const dinners = ranked.filter((row) => row.recipe.meal === "dinner");
     const lunches = ranked.filter((row) => row.recipe.meal === "lunch");
-    const tight = cap / headcount < 40;
+    const tight = cap / headcount < 45;
 
-    const waves = tight
-      ? [dinners, lunches, breakfasts]
-      : [breakfasts, dinners, lunches];
+    const waves = tight ? [dinners, lunches, breakfasts] : [breakfasts, dinners, lunches];
     for (const wave of waves) {
       for (const row of wave) {
         if (slots.some((slot) => !slot.recipe)) tryAdd(row.recipe);
@@ -271,5 +295,5 @@ window.CK_PLAN = (() => {
     return +Math.max(0, without - withPantry).toFixed(2);
   }
 
-  return { planWeek, bestBuy, storeById, recipeCost, STORES };
+  return { planWeek, bestBuy, storeById, recipeCost };
 })();
